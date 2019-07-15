@@ -1,0 +1,9 @@
+{
+  "extends": [
+    "adenvt"
+  ],
+  "env": {
+    "browser": true,
+    "node": true
+  },
+}

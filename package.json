@@ -1,0 +1,70 @@
+{
+  "name": "@rectajs/escpos-builder",
+  "version": "0.1.0",
+  "description": "Fluent ESC/POS command builder",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "npm run test:watch",
+    "dev": "cross-env NODE_ENV=development webpack --colors --no-progress --hide-modules",
+    "prod": "cross-env NODE_ENV=production webpack --colors --no-progress --hide-modules",
+    "test": "nyc ava",
+    "test:watch": "ava --watch",
+    "lint": "eslint --ext .js --ignore-path .gitignore .",
+    "fix": "eslint --ext .js --ignore-path .gitignore . --fix",
+    "ci": "npm run lint && npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rectajs/escpos-builder.git"
+  },
+  "keywords": [
+    "esc",
+    "pos",
+    "escpos",
+    "command",
+    "builder",
+    "printer",
+    "thermal"
+  ],
+  "author": "Ade Novid",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rectajs/escpos-builder/issues"
+  },
+  "homepage": "https://github.com/rectajs/escpos-builder#readme",
+  "devDependencies": {
+    "@babel/core": "^7.5.4",
+    "@babel/preset-env": "^7.5.4",
+    "@babel/register": "^7.4.4",
+    "ava": "^2.2.0",
+    "babel-eslint": "^10.0.2",
+    "babel-loader": "^8.0.6",
+    "cross-env": "^5.2.0",
+    "eslint": "^6.0.1",
+    "eslint-config-adenvt": "^4.0.0",
+    "eslint-config-standard": "^13.0.1",
+    "eslint-plugin-import": "^2.18.0",
+    "eslint-plugin-node": "^9.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "eslint-plugin-unicorn": "^9.1.1",
+    "eslint-plugin-varspacing": "^1.2.1",
+    "eslint-plugin-vue": "^5.2.3",
+    "lodash-webpack-plugin": "^0.11.5",
+    "nyc": "^14.1.1",
+    "webpack": "^4.35.3",
+    "webpack-cli": "^3.3.6",
+    "webpack-dev-server": "^3.7.2",
+    "webpack-merge": "^4.2.1",
+    "webpackbar": "^3.2.0",
+    "core-js": "^3.1.4"
+  },
+  "dependencies": {
+    "mutable-buffer": "^2.1.1"
+  },
+  "ava": {
+    "require": [
+      "@babel/register"
+    ]
+  }
+}
