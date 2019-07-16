@@ -1,6 +1,10 @@
 import MutableBuffer from 'mutable-buffer'
 import { LF, ESC } from './constant'
 
+export {
+  MODE,
+} from './constant'
+
 export default class EscPosBuilder {
   constructor () {
     this.buffer = new MutableBuffer()
@@ -72,14 +76,20 @@ export default class EscPosBuilder {
 
   align (mode) {
     const align = String(mode).toLowerCase()
-    const code  = [
-      'left',
-      'center',
-      'right',
-    ].indexOf(align)
+    const code  = ['left', 'center', 'right'].indexOf(align)
 
     this.buffer.write(ESC)
     this.buffer.write('\u0061')
+    this.buffer.writeUInt8(code)
+
+    return this
+  }
+
+  mode (...params) {
+    const code = params.reduce((a, b) => (a | b), 0x00)
+
+    this.buffer.write(ESC)
+    this.buffer.write('\u0021')
     this.buffer.writeUInt8(code)
 
     return this
@@ -96,6 +106,6 @@ export default class EscPosBuilder {
   }
 
   toString () {
-    return this.output().toString()
+    return this.output().toString('ascii')
   }
 }
