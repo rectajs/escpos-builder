@@ -1,13 +1,39 @@
 import MutableBuffer from 'mutable-buffer'
+import iconv from 'iconv-lite'
 import { LF, ESC } from './constant'
+import { isNumber, isString, isBoolean } from './utils'
 
 export {
   MODE,
 } from './constant'
 
 export default class EscPosBuilder {
-  constructor () {
-    this.buffer = new MutableBuffer()
+  constructor (encoding = 'utf-8') {
+    this.encoding = encoding
+    this.buffer   = new MutableBuffer()
+  }
+
+  setEncoding (encoding) {
+    this.encoding = encoding
+
+    return this
+  }
+
+  getEncoding () {
+    return this.encoding
+  }
+
+  write (value, encode) {
+    if (isNumber(value))
+      this.buffer.writeUInt8(value)
+    else if (isBoolean(value))
+      this.buffer.writeUInt8(value ? 1 : 0)
+    else if (isString(value))
+      this.buffer.write(iconv.encode(value, encode || this.encoding))
+    else
+      this.buffer.write(value)
+
+    return this
   }
 
   raw (buffer) {
@@ -17,8 +43,8 @@ export default class EscPosBuilder {
   }
 
   init () {
-    this.buffer.write(ESC)
-    this.buffer.write('\u0040')
+    this.write(ESC)
+    this.write('@')
 
     return this
   }
@@ -27,39 +53,52 @@ export default class EscPosBuilder {
     return this.init()
   }
 
-  feed (n = 4) {
-    this.buffer.write(new Array(n).fill(LF).join(''))
+  feed (n = 4, native = false) {
+    if (native) {
+      this.write(ESC)
+      this.write('d')
+      this.write(n)
+    } else
+      this.write(new Array(n).fill(LF).join(''))
+
+    return this
+  }
+
+  reverse (n = 4) {
+    this.write(ESC)
+    this.write('e')
+    this.write(n)
 
     return this
   }
 
   text (text) {
-    this.buffer.write(text)
-    this.buffer.write(LF)
+    this.write(text)
+    this.write(LF)
 
     return this
   }
 
   underline (mode) {
-    this.buffer.write(ESC)
-    this.buffer.write('\u002D')
-    this.buffer.writeUInt8(mode)
+    this.write(ESC)
+    this.write('-')
+    this.write(mode)
 
     return this
   }
 
   bold (mode) {
-    this.buffer.write(ESC)
-    this.buffer.write('\u0045')
-    this.buffer.writeUInt8(mode)
+    this.write(ESC)
+    this.write('E')
+    this.write(mode)
 
     return this
   }
 
   doubleStrike (mode) {
-    this.buffer.write(ESC)
-    this.buffer.write('\u0047')
-    this.buffer.writeUInt8(mode)
+    this.write(ESC)
+    this.write('G')
+    this.write(mode)
 
     return this
   }
@@ -67,9 +106,9 @@ export default class EscPosBuilder {
   font (mode) {
     const code = String(mode).toUpperCase().charCodeAt(0) - 65
 
-    this.buffer.write(ESC)
-    this.buffer.write('\u004D')
-    this.buffer.write(code)
+    this.write(ESC)
+    this.write('M')
+    this.write(`${code}`)
 
     return this
   }
@@ -78,9 +117,9 @@ export default class EscPosBuilder {
     const align = String(mode).toLowerCase()
     const code  = ['left', 'center', 'right'].indexOf(align)
 
-    this.buffer.write(ESC)
-    this.buffer.write('\u0061')
-    this.buffer.writeUInt8(code)
+    this.write(ESC)
+    this.write('a')
+    this.write(code)
 
     return this
   }
@@ -88,9 +127,9 @@ export default class EscPosBuilder {
   mode (...params) {
     const code = params.reduce((a, b) => (a | b), 0x00)
 
-    this.buffer.write(ESC)
-    this.buffer.write('\u0021')
-    this.buffer.writeUInt8(code)
+    this.write(ESC)
+    this.write('!')
+    this.write(code)
 
     return this
   }
@@ -105,7 +144,7 @@ export default class EscPosBuilder {
     return this.buffer.flush()
   }
 
-  toString () {
-    return this.output().toString('ascii')
+  toString (encoding) {
+    return iconv.decode(this.output(), encoding || this.encoding)
   }
 }

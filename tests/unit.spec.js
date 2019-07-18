@@ -4,6 +4,30 @@ import EscPos, { MODE } from '../src'
 const esc = new EscPos()
 const buf = (array) => Buffer.from(Uint8Array.from(array))
 
+test('contructor', (t) => {
+  const instance = new EscPos('ascii')
+
+  t.is(instance instanceof EscPos, true)
+  t.is(instance.getEncoding(), 'ascii')
+})
+
+test('.setEncoding', (t) => {
+  const instance = new EscPos()
+
+  t.is(instance.getEncoding(), 'utf-8')
+  t.is(instance.setEncoding('ascii').getEncoding(), 'ascii')
+})
+
+test('.write()', (t) => {
+  t.deepEqual(esc.write('Hello World').toString(), 'Hello World')
+
+  t.deepEqual(esc.write(1).output(), buf([0x01]))
+  t.deepEqual(esc.write(true).output(), buf([0x01]))
+
+  t.deepEqual(esc.write([0x01, 0x02, 0x03]).output(), buf([0x01, 0x02, 0x03]))
+  t.deepEqual(esc.write(buf([0x01, 0x02, 0x03])).output(), buf([0x01, 0x02, 0x03]))
+})
+
 test('.init()', (t) => {
   t.deepEqual(esc.init().output(), buf([0x1B, 0x40]))
   t.deepEqual(esc.reset().output(), buf([0x1B, 0x40]))
@@ -21,6 +45,14 @@ test('.text()', (t) => {
 test('.feed()', (t) => {
   t.is(esc.feed().toString(), '\n\n\n\n')
   t.is(esc.feed(5).toString(), '\n\n\n\n\n')
+
+  t.deepEqual(esc.feed(5, true).output(), buf([0x1B, 0x64, 0x05]))
+})
+
+test('.reverse()', (t) => {
+  t.deepEqual(esc.reverse().output(), buf([0x1B, 0x65, 0x04]))
+  t.deepEqual(esc.reverse(4).output(), buf([0x1B, 0x65, 0x04]))
+  t.deepEqual(esc.reverse(5).output(), buf([0x1B, 0x65, 0x05]))
 })
 
 test('.underline()', (t) => {
